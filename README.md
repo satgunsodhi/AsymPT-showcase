@@ -9,6 +9,12 @@
 
 ---
 
+## Author
+
+- **Satgun Singh Sodhi**
+
+---
+
 ## Overview
 
 **AsymPT** is a hybrid CNN-Transformer architecture for **medical image segmentation**, built around the principle of *Asymmetric Parallelism* — placing transformer components only where they provide the most benefit, and CNN components where efficiency matters most.
