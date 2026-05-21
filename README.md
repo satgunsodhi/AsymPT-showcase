@@ -150,23 +150,32 @@ The model is evaluated on the **Synapse Multi-Organ CT Segmentation** dataset:
 
 ```
 AsymPT/
-├── configs/config.yaml               # Training hyperparameters
+├── configs/
+│   └── config.yaml                   # Training hyperparameters
 ├── models/
-│   ├── asympt.py                     # Full model definition
-│   ├── parallel_hybrid_block.py      # CNN-Transformer block + Gated Fusion
-│   ├── dual_swin_block.py            # Swin bottleneck
-│   ├── decoder.py                    # U-Net decoder
-│   └── encoder.py                    # EfficientNet-B3 wrapper
-├── datasets/synapse.py               # Synapse dataset loader
+│   ├── __init__.py
+│   ├── asympt.py                     # Full model definition + get_parameter_groups()
+│   ├── parallel_hybrid_block.py      # Core CNN-Transformer parallel block + Gated Fusion
+│   ├── dual_swin_block.py            # Swin Transformer bottleneck (2 blocks)
+│   ├── decoder.py                    # U-Net style multi-scale decoder
+│   └── encoder.py                    # EfficientNet-B3 encoder wrapper
+├── datasets/
+│   ├── __init__.py
+│   └── synapse.py                    # Synapse Multi-Organ dataset + SynapseDataModule
 ├── utils/
-│   ├── metrics.py                    # Dice, HD95
-│   ├── losses.py                     # CombinedLoss + DeepSupervisionLoss
-│   └── visualization.py
-├── train.py
-├── evaluate.py
-├── inference.py                      # NIfTI / PNG / NPY / NPZ support
-├── AsymPT_Workflow.ipynb
-└── requirements.txt
+│   ├── __init__.py
+│   ├── metrics.py                    # Dice, HD95 (per-class + mean)
+│   ├── losses.py                     # CombinedLoss (Dice + CE) + DeepSupervisionLoss
+│   └── visualization.py             # Segmentation overlay + attention map visualization
+├── train.py                          # Full training pipeline with AMP, early stopping, TensorBoard
+├── evaluate.py                       # Evaluation with per-class and per-sample metrics
+├── inference.py                      # Inference on NIfTI, PNG, NPY, NPZ images
+├── test_model.py                     # Model unit tests
+├── AsymPT_Workflow.ipynb             # End-to-end walkthrough notebook
+├── Demo_Segmentation.ipynb           # Segmentation demo notebook
+├── requirements.txt
+├── setup.py
+└── README.md
 ```
 
 > 🔒 Full source code is private. Request access for research collaboration.
@@ -178,7 +187,8 @@ AsymPT/
 1. Chen et al. (2021). *TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation*. [arXiv:2102.04306](https://arxiv.org/abs/2102.04306)
 2. Liu et al. (2021). *Swin Transformer: Hierarchical Vision Transformer using Shifted Windows*. ICCV 2021. [arXiv:2103.14030](https://arxiv.org/abs/2103.14030)
 3. Tan & Le (2019). *EfficientNet: Rethinking Model Scaling for CNNs*. ICML 2019. [arXiv:1905.11946](https://arxiv.org/abs/1905.11946)
-4. Cao et al. (2021). *Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation*. [arXiv:2105.05537](https://arxiv.org/abs/2105.05537)
+4. Zhou et al. (2019). *UNet++: Redesigning Skip Connections to Exploit Multiscale Features*. IEEE TMI. [arXiv:1912.05074](https://arxiv.org/abs/1912.05074)
+5. Cao et al. (2021). *Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation*. [arXiv:2105.05537](https://arxiv.org/abs/2105.05537)
 
 ---
 

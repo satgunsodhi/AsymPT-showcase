@@ -30,6 +30,20 @@
 | Parameters | 35–40M |
 | FLOPs | ~28B |
 
+## Synapse Dataset — 9 Classes
+
+| Index | Organ |
+|---|---|
+| 0 | Background |
+| 1 | Spleen |
+| 2 | Right Kidney |
+| 3 | Left Kidney |
+| 4 | Gallbladder |
+| 5 | Esophagus |
+| 6 | Liver |
+| 7 | Stomach |
+| 8 | Aorta |
+
 ## Limitations
 
 - Trained and evaluated only on Synapse Multi-Organ CT dataset
