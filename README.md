@@ -105,11 +105,19 @@ AsymPT uses a **Combined Loss** of Dice + Cross-Entropy:
 L_total = w_dice × L_dice + w_ce × L_ce
 ```
 
+An optional **Focal Loss** term can be added for hard-example mining, down-weighting easy examples and focusing training on small, hard-to-segment organ classes (e.g. Gallbladder, Esophagus):
+
+```
+L_total = w_dice × L_dice + w_ce × L_ce + w_focal × L_focal
+```
+
 With deep supervision (default on), the final loss is a weighted sum over 3 decoder outputs:
 
 ```
 L_ds = 1.0 × L_main + 0.4 × L_aux1 + 0.2 × L_aux2
 ```
+
+`CombinedLoss` also supports a `label_smoothing` parameter to reduce overconfident predictions.
 
 ---
 
@@ -127,6 +135,25 @@ L_ds = 1.0 × L_main + 0.4 × L_aux1 + 0.2 × L_aux2
 | Mixed precision | AMP (torch.cuda.amp) |
 | Early stopping patience | 15 epochs |
 | Deep supervision | ✅ |
+| Label smoothing | Configurable (`CombinedLoss`) |
+| EMA | ✅ Exponential Moving Average model wrapper |
+
+---
+
+## Data Augmentation Pipeline
+
+AsymPT uses an augmentation pipeline specifically designed to address the overfitting gap (train Dice ~96% vs val Dice ~88%) observed in abdominal CT segmentation:
+
+| Augmentation | Type | Details |
+|---|---|---|
+| **Elastic Deformation** | Spatial | Simulates soft tissue motion; smooth random displacement field (alpha=50, sigma=5, p=0.3) |
+| **Random Scale + Crop** | Spatial | Scale range 0.8–1.2×, crop back to 224×224; multi-scale organ robustness (p=0.5) |
+| **Horizontal / Vertical Flip** | Spatial | Standard flips (p=0.5 each) |
+| **Random 90° Rotation** | Spatial | 0/90/180/270° rotation |
+| **Brightness / Contrast Jitter** | Intensity | Scale ±10%, shift ±0.1 (p=0.5) |
+| **Gaussian Noise** | Intensity | σ ∈ [0.02, 0.08] (p=0.5) |
+| **Gaussian Blur** | Intensity | kernel=5, σ ∈ [0.5, 1.5] (p=0.3) |
+| **Cutout / Random Erasing** | Occlusion | 1 hole, 5–15% of image area (p=0.3); image only, label unchanged |
 
 ---
 
@@ -165,8 +192,10 @@ AsymPT/
 ├── utils/
 │   ├── __init__.py
 │   ├── metrics.py                    # Dice, HD95 (per-class + mean)
-│   ├── losses.py                     # CombinedLoss (Dice + CE) + DeepSupervisionLoss
-│   └── visualization.py             # Segmentation overlay + attention map visualization
+│   ├── losses.py                     # CombinedLoss (Dice + CE + Focal) + DeepSupervisionLoss
+│   ├── visualization.py             # Segmentation overlay, attention maps, predictions grid
+│   ├── augmentation.py              # Elastic deformation, scale/crop, cutout pipeline
+│   └── ema.py                        # Exponential Moving Average model wrapper
 ├── train.py                          # Full training pipeline with AMP, early stopping, TensorBoard
 ├── evaluate.py                       # Evaluation with per-class and per-sample metrics
 ├── inference.py                      # Inference on NIfTI, PNG, NPY, NPZ images
@@ -189,6 +218,7 @@ AsymPT/
 3. Tan & Le (2019). *EfficientNet: Rethinking Model Scaling for CNNs*. ICML 2019. [arXiv:1905.11946](https://arxiv.org/abs/1905.11946)
 4. Zhou et al. (2019). *UNet++: Redesigning Skip Connections to Exploit Multiscale Features*. IEEE TMI. [arXiv:1912.05074](https://arxiv.org/abs/1912.05074)
 5. Cao et al. (2021). *Swin-Unet: Unet-like Pure Transformer for Medical Image Segmentation*. [arXiv:2105.05537](https://arxiv.org/abs/2105.05537)
+6. Lin et al. (2017). *Focal Loss for Dense Object Detection*. ICCV 2017. [arXiv:1708.02002](https://arxiv.org/abs/1708.02002)
 
 ---
 

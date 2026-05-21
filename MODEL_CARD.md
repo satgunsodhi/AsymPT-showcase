@@ -29,6 +29,8 @@
 | Mean HD95 | 18–23 mm |
 | Parameters | 35–40M |
 | FLOPs | ~28B |
+| Train Dice | ~96% |
+| Val Dice | ~88% |
 
 ## Synapse Dataset — 9 Classes
 
@@ -43,6 +45,24 @@
 | 6 | Liver |
 | 7 | Stomach |
 | 8 | Aorta |
+
+## Training Improvements (Latest)
+
+- **Focal Loss** added to `CombinedLoss` for hard-example mining on small organs (Gallbladder, Esophagus); based on Lin et al. (2017)
+- **Label smoothing** parameter added to `CombinedLoss` to reduce overconfident predictions
+- **EMA (Exponential Moving Average)** model wrapper (`utils/ema.py`) added for smoother weight averaging during training
+- **Advanced augmentation pipeline** (`utils/augmentation.py`) targeting the train/val Dice gap (~96% vs ~88%):
+  - Elastic deformation (soft tissue simulation, p=0.3)
+  - Random scale + crop (multi-scale robustness 0.8–1.2×, p=0.5)
+  - Cutout / random erasing (forces contextual learning, p=0.3)
+  - Basic flips, rotations, brightness/contrast, Gaussian noise and blur
+
+## Visualization
+
+Updated `utils/visualization.py` includes:
+- `visualize_predictions_grid`: curated grid selecting the most informative slices (highest organ count), with organ-colored overlays and per-slice Dice scores
+- Error maps distinguishing: 🟢 correct foreground, 🔴 false negatives, 🟡 false positives, 🟠 misclassifications
+- `compute_sample_dice`: per-class and mean Dice for single-sample evaluation
 
 ## Limitations
 
