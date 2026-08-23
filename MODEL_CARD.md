@@ -21,54 +21,42 @@
 | Output | Per-pixel class labels for 9 abdominal organs |
 | Inference latency | ~150–300ms per slice (GPU) |
 
-## Performance
+## Performance (Latest Stable Run)
 
 | Metric | Value |
 |---|---|
-| Mean Dice (Synapse, 9-class) | 80–82% |
-| Mean HD95 | 18–23 mm |
-| Parameters | 35–40M |
+| Mean Dice (Synapse, 9-class, excl. background) | 87.88% |
+| Parameters | ~35–40M |
 | FLOPs | ~28B |
-| Train Dice | ~96% |
-| Val Dice | ~88% |
+| Training hardware | 1× NVIDIA Tesla T4 |
+| Training time | ~10.7 hours (219 epochs, best checkpoint @ epoch 169) |
 
-## Synapse Dataset — 9 Classes
+### Per-Organ Dice
 
-| Index | Organ |
+| Organ | Dice (%) |
 |---|---|
-| 0 | Background |
-| 1 | Spleen |
-| 2 | Right Kidney |
-| 3 | Left Kidney |
-| 4 | Gallbladder |
-| 5 | Esophagus |
-| 6 | Liver |
-| 7 | Stomach |
-| 8 | Aorta |
+| Background | 99.45 |
+| Spleen | 87.59 |
+| Right Kidney | 92.02 |
+| Left Kidney | 89.63 |
+| Gallbladder | 88.90 |
+| Esophagus | 88.07 |
+| Liver | 83.93 |
+| Stomach | 88.04 |
+| Aorta | 84.87 |
 
-## Training Improvements (Latest)
+## Training Improvements (Research Notes)
 
-- **Focal Loss** added to `CombinedLoss` for hard-example mining on small organs (Gallbladder, Esophagus); based on Lin et al. (2017)
-- **Label smoothing** parameter added to `CombinedLoss` to reduce overconfident predictions
-- **EMA (Exponential Moving Average)** model wrapper (`utils/ema.py`) added for smoother weight averaging during training
-- **Advanced augmentation pipeline** (`utils/augmentation.py`) targeting the train/val Dice gap (~96% vs ~88%):
-  - Elastic deformation (soft tissue simulation, p=0.3)
-  - Random scale + crop (multi-scale robustness 0.8–1.2×, p=0.5)
-  - Cutout / random erasing (forces contextual learning, p=0.3)
-  - Basic flips, rotations, brightness/contrast, Gaussian noise and blur
+Since the initial showcase release, iterative refinement of the training recipe (loss design, data augmentation strategy, and model regularization) closed a significant performance gap on historically hard classes:
 
-## Visualization
-
-Updated `utils/visualization.py` includes:
-- `visualize_predictions_grid`: curated grid selecting the most informative slices (highest organ count), with organ-colored overlays and per-slice Dice scores
-- Error maps distinguishing: 🟢 correct foreground, 🔴 false negatives, 🟡 false positives, 🟠 misclassifications
-- `compute_sample_dice`: per-class and mean Dice for single-sample evaluation
+- Gallbladder and Esophagus Dice improved from ~66–72% to ~88%, now on par with larger organs
+- Overall mean Dice improved from an early ~80–82% baseline to a measured **87.88%**
+- Exact augmentation recipe, loss weighting, and regularization settings are part of the private codebase
 
 ## Limitations
 
 - Trained and evaluated only on Synapse Multi-Organ CT dataset
 - Performance on MRI, ultrasound, or other modalities is untested
-- Gallbladder and esophagus classes show lower Dice (~66–72%) due to small size and anatomical variability
 - Not validated for clinical use
 
 ## License
